@@ -1,4 +1,5 @@
 import Modal from 'react-modal';
+import { Image } from '../App/App';
 
 const customStyles = {
   content: {
@@ -18,7 +19,13 @@ const customStyles = {
 
 Modal.setAppElement('#root');
 
-export default function ImageModal({ isOpen, onRequestClose, image }) {
+type Props = {
+  isOpen: boolean;
+  onRequestClose: () => void;
+  image: Image | null;
+};
+
+export default function ImageModal({ isOpen, onRequestClose, image }: Props) {
   if (!image) {
     return null;
   }

@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import css from './SearchBar.module.css';
 
-export default function SearchBar({ onSubmit }) {
-  const [inputValue, setInputValue] = useState('');
+type Props = {
+  onSubmit: (value: string | null) => void;
+};
 
-  const handleInputChange = e => {
+export default function SearchBar({ onSubmit }: Props) {
+  const [inputValue, setInputValue] = useState<string>('');
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit(inputValue);
+    onSubmit(inputValue || null);
     setInputValue('');
   };
 

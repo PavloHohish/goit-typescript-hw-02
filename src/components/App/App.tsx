@@ -8,17 +8,27 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage.jsx';
 import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn.jsx';
 import ImageModal from '../ImageModal/ImageModal.jsx';
 
-export default function App() {
-  const [query, setQuery] = useState('');
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [hasMore, setHasMore] = useState(false);
+export interface Image {
+  id: number;
+  webformatURL: string;
+  tags: string;
+  largeImageURL: string;
+}
 
-  const fetchImages = async (keyword, page) => {
+export default function App() {
+  const [query, setQuery] = useState<string>('');
+  const [images, setImages] = useState<Image[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+  const [selectedImage, setSelectedImage] = useState<Image | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+
+  const fetchImages = async (
+    keyword: string,
+    page: number
+  ): Promise<Image[]> => {
     const apiKey = '43854622-acb16c386b106d84adf209c8f';
     const url = `https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(
       keyword
@@ -27,13 +37,15 @@ export default function App() {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(response.status);
+        throw new Error(`HTTP error. Status: ${response.status}`);
       }
       const data = await response.json();
       if (data.hits.length === 0) {
         setHasMore(false);
         toast.error('No images found');
-      } else setHasMore(true);
+      } else {
+        setHasMore(true);
+      }
       return data.hits;
     } catch (error) {
       toast.error('Failed to fetch images');
@@ -55,8 +67,8 @@ export default function App() {
       .finally(() => setLoading(false));
   }, [query, page]);
 
-  const handleSearchSubmit = searchQuery => {
-    if (searchQuery.trim() === '') {
+  const handleSearchSubmit = (searchQuery: string | null) => {
+    if (searchQuery === null || searchQuery.trim() === '') {
       toast.error('Please enter a search query.');
       return;
     }
@@ -69,7 +81,7 @@ export default function App() {
     setPage(prevPage => prevPage + 1);
   };
 
-  const openModal = image => {
+  const openModal = (image: Image) => {
     setSelectedImage(image);
     setModalIsOpen(true);
   };

@@ -1,0 +1,12 @@
+.list {
+  margin: 48px;
+  display: flex;
+  gap: 28px 24px;
+  flex-wrap: wrap;
+}
+
+.li {
+  flex: 1 1 calc(20% - 28px);
+  height: 225px;
+  box-shadow: 0 0 1em #bfbfbf;
+}

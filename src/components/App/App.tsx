@@ -7,6 +7,7 @@ import Loader from '../Loader/Loader.jsx';
 import ErrorMessage from '../ErrorMessage/ErrorMessage.jsx';
 import LoadMoreBtn from '../LoadMoreBtn/LoadMoreBtn.jsx';
 import ImageModal from '../ImageModal/ImageModal.jsx';
+import fetchImages from '../../services/pixabay.js';
 
 export interface Image {
   id: number;
@@ -24,34 +25,7 @@ export default function App() {
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(false);
-
-  const fetchImages = async (
-    keyword: string,
-    page: number
-  ): Promise<Image[]> => {
-    const apiKey = '43854622-acb16c386b106d84adf209c8f';
-    const url = `https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(
-      keyword
-    )}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=12`;
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error. Status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.hits.length === 0) {
-        setHasMore(false);
-        toast.error('No images found');
-      } else {
-        setHasMore(true);
-      }
-      return data.hits;
-    } catch (error) {
-      toast.error('Failed to fetch images');
-      throw error;
-    }
-  };
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
     if (!query) {
@@ -62,16 +36,20 @@ export default function App() {
     setError(null);
 
     fetchImages(query, page)
-      .then(hits => setImages(prevImages => [...prevImages, ...hits]))
-      .catch(err => setError(err))
+      .then(({ images, hasMoreImg }) => {
+        setImages(prevImages => [...prevImages, ...images]);
+        setHasMore(hasMoreImg);
+      })
+      .catch(err => setError(err.message || 'Failed to fetch images'))
       .finally(() => setLoading(false));
-  }, [query, page]);
+  }, [submitted, page]);
 
   const handleSearchSubmit = (searchQuery: string | null) => {
     if (searchQuery === null || searchQuery.trim() === '') {
       toast.error('Please enter a search query.');
       return;
     }
+    setSubmitted(prevState => !prevState);
     setQuery(searchQuery);
     setImages([]);
     setPage(1);
